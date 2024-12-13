@@ -1,0 +1,18 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2024 Dave Conroy <dave@tiredofit.ca>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+set -a
+prepare_service
+set +a
+PROCESS_NAME="peertube"
+
+if check_container_restarted ; then
+    call peertube_bootstrap_filesystem
+    call peertube_generate_configuration
+    call peertube_post_init
+fi
+
+liftoff

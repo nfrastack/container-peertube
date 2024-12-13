@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: © 2024 Dave Conroy <dave@tiredofit.ca>
+#
+# SPDX-License-Identifier: MIT
+
+peertube_bootstrap_filesystem() {
+    if [ ! -d "${CONFIG_PATH}" ] ; then
+        mkdir -p "${CONFIG_PATH}"
+    fi
+    if [ "$(stat -c %U "${CONFIG_PATH}")" != "peertube" ] ; then silent chown -R peertube:peertube "${CONFIG_PATH}" ; fi
+    if [ "$(stat -c %a "${CONFIG_PATH}")" != "755" ] ; then chmod -R 755 "${CONFIG_PATH}" ; fi
+
+    if [ ! -d "${DATA_PATH}" ] ; then
+        mkdir -p "${DATA_PATH}"
+    fi
+    if [ "$(stat -c %U "${DATA_PATH}")" != "peertube" ] ; then chown -R peertube:peertube "${DATA_PATH}" ; fi
+    if [ "$(stat -c %a "${DATA_PATH}")" != "700" ] ; then chmod -R 700 "${DATA_PATH}" ; fi
+
+    if [ ! -d "${LOG_PATH}" ] ; then
+        mkdir -p "${LOG_PATH}"
+    fi
+    if [ "$(stat -c %U "${LOG_PATH}")" != "peertube" ] ; then chown peertube:peertube "${LOG_PATH}" ; fi
+}
+
+peertube_generate_configuration() {
+    if [ ! -f "${CONFIG_PATH}"/"${CONFIG_FILE}" ] ; then
+        s6-setuidgid peertube cp /container/data/peertube/config/production.yaml.example "${CONFIG_PATH}"/"${CONFIG_FILE}"
+        s6-setuidgid peertube cp /container/data/peertube/config/custom-environment-variables.yaml "${CONFIG_PATH}"/
+    fi
+
+    transform_var file \
+                        PEERTUBE_SECRET
+
+    if [ -z "${PEERTUBE_SECRET}" ]; then
+        if [ ! -f "${CONFIG_PATH}/.peertube.secret" ]; then
+            openssl rand -hex 32 > "${CONFIG_PATH}"/.peertube.secret
+            print_info "Automatically generated PEERTUBE_SECRET - turn it into an environment variable with contents of '${CONFIG_PATH}/.peertube.secret'"
+        fi
+        export PEERTUBE_SECRET=$(cat "${CONFIG_PATH}"/.peertube.secret)
+    fi
+
+    s6-setuidgid peertube yq -i '
+                                    .secrets.peertube = env(PEERTUBE_SECRET)
+                                ' "${CONFIG_PATH}"/"${CONFIG_FILE}"
+
+    transform_var file \
+                        DB_HOST \
+                        DB_PORT \
+                        DB_USER \
+                        DB_PASS \
+                        DB_SUFFIX \
+                        DB_NAME
+
+    sanity_var DB_USER "DB Username"
+    sanity_var DB_PASS "DB Password"
+    sanity_var DB_HOST "DB Host"
+    sanity_var DB_NAME "DB Name"
+    db_ready postgres
+}

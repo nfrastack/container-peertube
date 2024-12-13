@@ -1,0 +1,65 @@
+services:
+
+  peertube-app:
+    image: docker.io/tiredofit/peertube:latest
+    container_name: peertube-app
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.peertube-app.rule=Host(`peertube.example.com`)
+      - traefik.http.services.peertube-app.loadbalancer.server.port=80
+    volumes:
+      - ./config:/config
+      - ./data:/data
+      - ./logs:/logs/peertube
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=peertube-app
+
+      - DB_HOST=peertube-db
+      - DB_PORT=5432
+      - DB_SSL=FALSE
+      - DB_NAME=peertube
+      - DB_USER=peertube
+      - DB_PASS=password
+
+      - REDIS_HOST=peertube-redis
+      - REDIS_PORT=6379
+    networks:
+      - proxy
+      - services
+    restart: always
+
+  peertube-db:
+    image: tiredofit/postgres:17
+    container_name: peertube-db
+    volumes:
+      - ./db/postgresql:/var/lib/postgresql
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=peertube-db
+      - CONTAINER_ENABLE_MONITORING=FALSE
+
+      - SUPERUSER_PASS=superuser
+      - DB_NAME=peertube
+      - DB_USER=peertube
+      - DB_PASS=password
+    networks:
+      - services
+    restart: always
+
+  peertube-redis:
+    image: tiredofit/redis:7
+    container_name: peertube-redis
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=peertube-redis
+      - CONTAINER_ENABLE_MONITORING=FALSE
+
+    networks:
+      - services
+    restart: always
+networks:
+  proxy:
+    external: true
+  services:
+    external: true
