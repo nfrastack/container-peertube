@@ -56,6 +56,8 @@ RUN echo "" && \
                     && \
     \
     clone_git_repo "${PEERTUBE_REPO_URL}" "${PEERTUBE_VERSION}" /app && \
+    if [ -d "/build-assets/src" ] ; then cp -Rp /build-assets/src/* /app ; fi; \
+    if [ -d "/build-assets/scripts" ] ; then for script in /build-assets/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
     mkdir -p /container/data/peertube/config && \
     cp -R /app/config/production.yaml.example /container/data/peertube/config && \
     cd client && \
