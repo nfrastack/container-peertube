@@ -13,6 +13,27 @@ liftoff
 
 cd /app
 
+transform_var file \
+                    DB_HOST \
+                    DB_PORT \
+                    DB_USER \
+                    DB_PASS \
+                    DB_SUFFIX \
+                    DB_NAME \
+                    OBJECT_STORAGE_CREDENTIALS_ACCESS_KEY_ID \
+                    OBJECT_STORAGE_CREDENTIALS_SECRET_ACCESS_KEY \
+                    OPENTELEMETRY_METRICS_PROMETHEUS_EXPORTER_HOST \
+                    OPENTELEMETRY_METRICS_PROMETHEUS_EXPORTER_PORT \
+                    OPENTELEMETRY_TRACING_JAEGER_EXPORTER_ENDPOINT \
+                    PEERTUBE_SECRET \
+                    REDIS_HOST \
+                    REDIS_PASS \
+                    SMTP_HOST \
+                    SMTP_USER \
+                    SMTP_PASS \
+                    SMTP_PORT \
+
+
 export HOME=/tmp/
 export NODE_ENV=production
 export NODE_CONFIG_DIR=${CONFIG_PATH}

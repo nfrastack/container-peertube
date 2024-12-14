@@ -48,7 +48,7 @@ services:
     image: tiredofit/postgres:17
     container_name: peertube-db
     volumes:
-      - /var/local/db/peertube.example.com/postgres:/var/lib/postgresql
+      - /var/local/db/peertube-db/postgres:/var/lib/postgresql
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=peertube-db
