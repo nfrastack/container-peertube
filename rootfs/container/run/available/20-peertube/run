@@ -18,5 +18,14 @@ export NODE_ENV=production
 export NODE_CONFIG_DIR=${CONFIG_PATH}
 export PEERTUBE_LOCAL_CONFIG=${CONFIG_PATH}
 
+case "${PEERTUBE_CONTAINER,,}" in
+    production )
+        peertube_exec="node dist/server"
+    ;;
+    * )
+        peertube_exec="npm run dev"
+    ;;
+esac
+
 print_start "Starting Peertube ${PEERTUBE_VERSION}"
-exec s6-setuidgid peertube node dist/server
+exec s6-setuidgid peertube ${peertube_exec}
