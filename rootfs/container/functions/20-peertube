@@ -21,6 +21,16 @@ peertube_bootstrap_filesystem() {
     if [ "$(stat -c %U "${LOG_PATH}")" != "peertube" ] ; then chown peertube:peertube "${LOG_PATH}" ; fi
 }
 
+peertube_configure_nginx() {
+    if var_notfalse "${ENABLE_NGINX}" ; then
+        update_template \
+                        /etc/nginx/snippets/server.available/peertube.conf \
+                            DATA_PATH \
+                            LISTEN_PORT \
+                            STORAGE_CLIENT_OVERRIDES_PATH \
+    fi
+}
+
 peertube_generate_configuration() {
     if [ ! -f "${CONFIG_PATH}"/"${CONFIG_FILE}" ] ; then
         s6-setuidgid peertube cp /container/data/peertube/config/production.yaml.example "${CONFIG_PATH}"/"${CONFIG_FILE}"
