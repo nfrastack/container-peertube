@@ -23,11 +23,15 @@ peertube_bootstrap_filesystem() {
 
 peertube_configure_nginx() {
     if var_notfalse "${ENABLE_NGINX}" ; then
+
+        _web_videos_tmp=$(basename "${STORAGE_WEB_VIDEOS_PATH}")
+
         update_template \
                         /etc/nginx/snippets/server.available/peertube.conf \
                             DATA_PATH \
                             LISTEN_PORT \
                             STORAGE_CLIENT_OVERRIDES_PATH \
+                            _web_videos_tmp
     fi
 }
 
