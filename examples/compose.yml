@@ -8,12 +8,20 @@ services:
       - traefik.http.routers.peertube-app.rule=Host(`peertube.example.com`)
       - traefik.http.services.peertube-app.loadbalancer.server.port=80
     volumes:
-      - ./config:/config
+      #- ./config:/config
       - ./data:/data
       - ./logs:/logs/peertube
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=peertube-app
+
+      - LOG_LEVEL=info
+
+      - WEBSERVER_HOSTNAME=tube.tiredofit.ca
+      - WEBSERVER_PORT=443
+      - WEBSERVER_HTTPS=true
+
+      - PEERTUBE_SECRET=super_secret_random_key
 
       - DB_HOST=peertube-db
       - DB_PORT=5432
@@ -24,6 +32,13 @@ services:
 
       - REDIS_HOST=peertube-redis
       - REDIS_PORT=6379
+
+      - SMTP_HOST=postfix-relay
+      - SMTP_PORT=25
+      - SMTP_FROM=noreply@example.com
+      - SMTP_TLS=false
+      - SMTP_DISABLE_STARTTLS=true
+      - ADMIN_EMAIL=admin@example.com
     networks:
       - proxy
       - services
@@ -33,7 +48,7 @@ services:
     image: tiredofit/postgres:17
     container_name: peertube-db
     volumes:
-      - ./db/postgresql:/var/lib/postgresql
+      - /var/local/db/peertube.example.com/postgres:/var/lib/postgresql
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=peertube-db
