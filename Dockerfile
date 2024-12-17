@@ -65,6 +65,8 @@ RUN echo "" && \
                                     nodejs \
                                     npm \
                                     postgresql-client \
+                                    python3 \
+                                    python3-pip \
                                     prosody \
                                     yarn \
                                 " \
