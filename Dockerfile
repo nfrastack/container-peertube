@@ -26,7 +26,7 @@ COPY README.md /usr/src/container/README.md
 
 COPY build-assets /build-assets
 
-ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0-rc.1"} \
+ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0"} \
     PEERTUBE_REPO_URL=${PEERTUBE_REPO_URL:-"https://github.com/Chocobozzz/PeerTube"} \
     PEERTUBE_CONTAINER=${PEERTUBE_CONTAINER:-"PRODUCTION"} \
     NGINX_SITE_ENABLED=peertube \
