@@ -29,7 +29,6 @@ COPY build-assets /build-assets
 ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0"} \
     PEERTUBE_REPO_URL=${PEERTUBE_REPO_URL:-"https://github.com/Chocobozzz/PeerTube"} \
     PEERTUBE_CONTAINER=${PEERTUBE_CONTAINER:-"PRODUCTION"} \
-    NGINX_SITE_ENABLED=peertube \
     NGINX_ENABLE_APPLICATION_CONFIGURATION=FALSE \
     NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
     NGINX_USER=peertube \
@@ -39,11 +38,12 @@ ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0"} \
 
 RUN echo "" && \
     PEERTUBE_BUILD_DEPS_ALPINE=" \
-                                   \
+                                   python3-dev \
                                " \
                                && \
     PEERTUBE_RUN_DEPS_ALPINE=" \
                                 ffmpeg \
+                                ffmpeg-dev \
                                 git \
                                 nodejs \
                                 npm \
@@ -55,9 +55,29 @@ RUN echo "" && \
                                 yq-go \
                              " \
                             && \
+    PEERTUBE_BUILD_DEPS_DEBIAN=" \
+                                    python3-dev \
+                                " \
+                                && \
+    PEERTUBE_RUN_DEPS_DEBIAN=" \
+                                    ffmpeg \
+                                    git \
+                                    nodejs \
+                                    npm \
+                                    postgresql-client \
+                                    prosody \
+                                    yarn \
+                                " \
+                                && \
     source /container/base/functions/container/build && \
     container_build_log && \
     create_user peertube 1000 peertube 1000 /dev/null && \
+    package repo key https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key && \
+    package repo add nodejs "deb https://deb.nodesource.com/node_$node_version nodistro main" && \
+    package repo key https://www.postgresql.org/media/keys/ACCC4CF8.asc && \
+    package repo add postgres "deb https://apt.postgresql.org/pub/repos/apt $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')')-pgdg main" && \
+    package repo key https://dl.yarnpkg.com/debian/pubkey.gpg && \
+    package repo add yarn "https://dl.yarnpkg.com/debian stable main" && \
     package update && \
     package upgrade && \
     package install \
@@ -95,7 +115,7 @@ RUN echo "" && \
                                 --network-timeout 1200000 \
                                 --network-concurrency 20 \
                                 ; \
-
+        \
         yarn cache clean ; \
     \
         mkdir -p /app/packages \
