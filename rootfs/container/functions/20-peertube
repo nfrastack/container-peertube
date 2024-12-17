@@ -13,7 +13,7 @@ peertube_bootstrap_filesystem() {
         mkdir -p "${DATA_PATH}"
     fi
     if [ "$(stat -c %U "${DATA_PATH}")" != "peertube" ] ; then chown -R peertube:peertube "${DATA_PATH}" ; fi
-    if [ "$(stat -c %a "${DATA_PATH}")" != "700" ] ; then chmod -R 700 "${DATA_PATH}" ; fi
+    if [ "$(stat -c %a "${DATA_PATH}")" != "755" ] ; then chmod -R 755 "${DATA_PATH}" ; fi
 
     if [ ! -d "${LOG_PATH}" ] ; then
         mkdir -p "${LOG_PATH}"
