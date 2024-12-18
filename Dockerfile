@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG DISTRO="alpine"
-ARG DISTRO_VARIANT="3.21"
+ARG DISTRO="debian"
+ARG DISTRO_VARIANT="bookworm"
 
 #FROM docker.io/tiredofit/nginx:${DISTRO}-${DISTRO_VARIANT}
-FROM tiredofit/nginx:ng
+FROM tiredofit/nginx:ng-debian
 
 LABEL org.opencontainers.image.title         "Peertube"
 LABEL org.opencontainers.image.description   "Dockerized decentralized video hosting network"
@@ -38,12 +38,10 @@ ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0"} \
 
 RUN echo "" && \
     PEERTUBE_BUILD_DEPS_ALPINE=" \
-                                   python3-dev \
                                " \
                                && \
     PEERTUBE_RUN_DEPS_ALPINE=" \
                                 ffmpeg \
-                                ffmpeg-dev \
                                 git \
                                 nodejs \
                                 npm \
@@ -56,30 +54,31 @@ RUN echo "" && \
                              " \
                             && \
     PEERTUBE_BUILD_DEPS_DEBIAN=" \
-                                    python3-dev \
                                 " \
                                 && \
     PEERTUBE_RUN_DEPS_DEBIAN=" \
                                     ffmpeg \
                                     git \
                                     nodejs \
-                                    npm \
                                     postgresql-client \
                                     python3 \
                                     python3-pip \
                                     prosody \
                                     yarn \
+                                    yq \
                                 " \
                                 && \
     source /container/base/functions/container/build && \
     container_build_log && \
     create_user peertube 1000 peertube 1000 /dev/null && \
     package repo key https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key && \
-    package repo add nodejs "deb https://deb.nodesource.com/node_$node_version nodistro main" && \
+    package repo add nodejs "deb https://deb.nodesource.com/node_22.x nodistro main" && \
     package repo key https://www.postgresql.org/media/keys/ACCC4CF8.asc && \
     package repo add postgres "deb https://apt.postgresql.org/pub/repos/apt $(cat /etc/os-release |grep "VERSION=" | awk 'NR>1{print $1}' RS='(' FS=')')-pgdg main" && \
     package repo key https://dl.yarnpkg.com/debian/pubkey.gpg && \
-    package repo add yarn "https://dl.yarnpkg.com/debian stable main" && \
+    package repo add yarn "deb https://dl.yarnpkg.com/debian stable main" && \
+    package repo key https://download.opensuse.org/repositories/home:alvistack/Debian_12/Release.key && \
+    package repo add yq "deb http://download.opensuse.org/repositories/home:/alvistack/Debian_12/ /" && \
     package update && \
     package upgrade && \
     package install \
@@ -128,7 +127,8 @@ RUN echo "" && \
                     /usr/src/peertube/CREDITS.md \
                     /usr/src/peertube/LICENSE \
                     /usr/src/peertube/README.md \
-                /app/ ; \
+                /app/ \
+                ; \
         \
         folders="core-utils ffmpeg models node-utils transcription" ; \
         for package in \
@@ -142,7 +142,8 @@ RUN echo "" && \
             cp -R \
                         /usr/src/peertube/packages/"${package}"/dist \
                         /usr/src/peertube/packages/"${package}"/package.json \
-                    /app/packages/${package} ; \
+                    /app/packages/${package} \
+                    ; \
         done ; \
         cp -R \
                     /usr/src/peertube/client/dist \
@@ -170,6 +171,6 @@ RUN echo "" && \
     package cleanup && \
     rm -rf /build-assets
 
-EXPOSE 9000 1935
+EXPOSE 1935 9000
 
 COPY rootfs/ /

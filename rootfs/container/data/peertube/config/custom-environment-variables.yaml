@@ -1,7 +1,6 @@
+# SPDX-FileCopyrightText: © 2024 Dave Conroy <dave@tiredofit.ca>
 #
-# This file will be read by node-config
-# See https://github.com/node-config/node-config/wiki/Environment-Variables#custom-environment-variables
-#
+# SPDX-License-Identifier: MIT
 
 listen:
   hostname: "LISTEN_HOSTNAME"

@@ -8,9 +8,8 @@ services:
       - traefik.http.routers.peertube-app.rule=Host(`peertube.example.com`)
       - traefik.http.services.peertube-app.loadbalancer.server.port=80
     volumes:
-      #- ./config:/config
       - ./data:/data
-      - ./logs:/logs/peertube
+      - ./logs:/logs
     environment:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=peertube-app
@@ -69,10 +68,10 @@ services:
       - TIMEZONE=America/Vancouver
       - CONTAINER_NAME=peertube-redis
       - CONTAINER_ENABLE_MONITORING=FALSE
-
     networks:
       - services
     restart: always
+
 networks:
   proxy:
     external: true
