@@ -29,8 +29,9 @@ COPY build-assets /build-assets
 ENV PEERTUBE_VERSION=${PEERTUBE_VERSION:-"v7.0.0"} \
     PEERTUBE_REPO_URL=${PEERTUBE_REPO_URL:-"https://github.com/Chocobozzz/PeerTube"} \
     PEERTUBE_CONTAINER=${PEERTUBE_CONTAINER:-"PRODUCTION"} \
-    NGINX_ENABLE_APPLICATION_CONFIGURATION=FALSE \
+    #NGINX_ENABLE_APPLICATION_CONFIGURATION=FALSE \
     NGINX_ENABLE_CREATE_SAMPLE_HTML=FALSE \
+    NGINX_SITE_ENABLED=peertube \
     NGINX_USER=peertube \
     NGINX_GROUP=peertube \
     IMAGE_NAME="tiredofit/peertube" \
@@ -87,8 +88,8 @@ RUN echo "" && \
                     && \
     \
     clone_git_repo "${PEERTUBE_REPO_URL}" "${PEERTUBE_VERSION}" /usr/src/peertube && \
-    if [ -d "/build-assets/src" ] ; then cp -Rp /build-assets/src/* /usr/src/peertube ; fi; \
-    if [ -d "/build-assets/scripts" ] ; then for script in /build-assets/scripts/*.sh; do echo "** Applying $script"; bash $script; done && \ ; fi ; \
+    build_assets src /usr/src/peertube && \
+    #build_assets scripts && \
     \
     cd /usr/src/peertube && \
     \
@@ -168,8 +169,7 @@ RUN echo "" && \
                 PEERTUBE_BUILD_DEPS \
                 && \
     \
-    package cleanup && \
-    rm -rf /build-assets
+    package cleanup
 
 EXPOSE 1935 9000
 
