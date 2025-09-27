@@ -1,12 +1,12 @@
 services:
 
   peertube-app:
-    image: docker.io/tiredofit/peertube:latest
+    image: docker.io/nfrastack/peertube:latest
     container_name: peertube-app
     labels:
       - traefik.enable=true
-      - traefik.http.routers.peertube-app.rule=Host(`peertube.example.com`)
-      - traefik.http.services.peertube-app.loadbalancer.server.port=80
+      - traefik.http.routers.peertube-example-com.rule=Host(`peertube.example.com`)
+      - traefik.http.services.peertube-example-com.loadbalancer.server.port=80
     volumes:
       - ./data:/data
       - ./logs:/logs
@@ -16,7 +16,7 @@ services:
 
       - LOG_LEVEL=info
 
-      - WEBSERVER_HOSTNAME=tube.tiredofit.ca
+      - WEBSERVER_HOSTNAME=peertube.example.com
       - WEBSERVER_PORT=443
       - WEBSERVER_HTTPS=true
 
@@ -44,14 +44,12 @@ services:
     restart: always
 
   peertube-db:
-    image: tiredofit/postgres:17
+    image: nfrastack/postgres:17
     container_name: peertube-db
     volumes:
       - /var/local/db/peertube-db/postgres:/var/lib/postgresql
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=peertube-db
-      - CONTAINER_ENABLE_MONITORING=FALSE
 
       - SUPERUSER_PASS=superuser
       - DB_NAME=peertube
@@ -62,12 +60,10 @@ services:
     restart: always
 
   peertube-redis:
-    image: tiredofit/redis:7
+    image: nfrastack/redis:7
     container_name: peertube-redis
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=peertube-redis
-      - CONTAINER_ENABLE_MONITORING=FALSE
     networks:
       - services
     restart: always
