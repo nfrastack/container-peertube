@@ -3,22 +3,12 @@
 # SPDX-License-Identifier: MIT
 
 peertube_bootstrap_filesystem() {
-    if [ ! -d "${CONFIG_PATH}" ] ; then
-        mkdir -p "${CONFIG_PATH}"
-    fi
-    if [ "$(stat -c %U "${CONFIG_PATH}")" != "peertube" ] ; then silent chown -R peertube:peertube "${CONFIG_PATH}" ; fi
-    if [ "$(stat -c %a "${CONFIG_PATH}")" != "755" ] ; then chmod -R 755 "${CONFIG_PATH}" ; fi
+    create_folder \
+                    "${CONFIG_PATH},\
+                    ${DATA_PATH},
+                    ${LOG_PATH}" \
+                    peertube:peertube 755
 
-    if [ ! -d "${DATA_PATH}" ] ; then
-        mkdir -p "${DATA_PATH}"
-    fi
-    if [ "$(stat -c %U "${DATA_PATH}")" != "peertube" ] ; then chown -R peertube:peertube "${DATA_PATH}" ; fi
-    if [ "$(stat -c %a "${DATA_PATH}")" != "755" ] ; then chmod -R 755 "${DATA_PATH}" ; fi
-
-    if [ ! -d "${LOG_PATH}" ] ; then
-        mkdir -p "${LOG_PATH}"
-    fi
-    if [ "$(stat -c %U "${LOG_PATH}")" != "peertube" ] ; then chown peertube:peertube "${LOG_PATH}" ; fi
     create_logrotate peertube "${LOG_PATH}"/peertube.log peertube peertube
     create_logrotate peertube-audit "${LOG_PATH}"/peertube-audit.log peertube peertube
 }

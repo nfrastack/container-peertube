@@ -44,7 +44,7 @@ services:
     restart: always
 
   peertube-db:
-    image: nfrastack/postgres:17
+    image: docker.io/tiredofit/postgres:17
     container_name: peertube-db
     volumes:
       - /var/local/db/peertube-db/postgres:/var/lib/postgresql
@@ -60,10 +60,33 @@ services:
     restart: always
 
   peertube-redis:
-    image: nfrastack/redis:7
+    image: docker.io/tiredofit/redis:7
     container_name: peertube-redis
     environment:
       - TIMEZONE=America/Vancouver
+    networks:
+      - services
+    restart: always
+
+  peertube-db-backup:
+    image: docker.io/tiredofit/db-backup:latest
+    container_name: peertube-db-backup
+    volumes:
+      - ./dbbackup:/backup
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=peertube-db-backup
+      - CONTAINER_ENABLE_MONITORING=FALSE
+
+      - DB01_HOST=peertube-db
+      - DB01_TYPE=postgresql
+      - DB01_NAME=peertube
+      - DB01_USER=peertube
+      - DB01_PASS=password
+      - DB01_BACKUP_INTERVAL=1440
+      - DB01_BACKUP_BEGIN=0000
+      - DB01_CLEANUP_TIME=8640
+      - DB01_ARCHIVE_TIME=30
     networks:
       - services
     restart: always

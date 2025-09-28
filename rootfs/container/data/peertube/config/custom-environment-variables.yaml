@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
 #
 # SPDX-License-Identifier: MIT
+# 7.3.0
 
 listen:
   hostname: "LISTEN_HOSTNAME"
@@ -53,6 +54,12 @@ rates_limit:
     window: RATELIMIT_DOWNLOAD_GENERATE_VIDEO_WINDOW
     max: RATELIMIT_DOWNLOAD_GENERATE_VIDEO_MAX
 
+###
+oauth2:
+  token_lifetime:
+    access_token: '1 day'
+    refresh_token: '2 weeks'
+
 trust_proxy:
   __name: "TRUST_PROXY"
   __format: "json"
@@ -67,11 +74,15 @@ database:
   ssl:
     __name: "DB_SSL"
     __format: "json"
+  ###
+  #pool:
+  #  max: 5
 
 redis:
   hostname: "REDIS_HOST"
   port: "REDIS_PORT"
   auth: "REDIS_AUTH"
+  ##db: 0
 
 smtp:
   hostname: "SMTP_HOST"
@@ -85,31 +96,7 @@ smtp:
     __name: "SMTP_DISABLE_STARTTLS"
     __format: "json"
   from_address: "SMTP_FROM"
-
-email:
-  body:
-    signature: "EMAIL_BODY_SIGNATURE"
-  subject:
-    prefix: "EMAIL_SUBJECT_PREFIX"
-
-defaults:
-  publish:
-    download_enabled:
-        __name: "DEFAULT_PUBLISH_ENABLE_DOWNLOAD"
-        __format: "json"
-    comments_policy: "DEFAULT_PUBLISH_COMMENTS_POLICY"
-    privacy: "DEFAULT_PUBLIC_PRIVACY"
-    license: "DEFAULT_PUBLIC_LICENSE"
-
-  p2p:
-    webapp:
-      enabled:
-        __name: "DEFAULT_P2P_ENABLE_WEBAPP"
-        __format: "json"
-    embed:
-      enabled:
-        __name: "DEFAULT_P2P_ENABLE_EMBED"
-        __format: "json"
+  #ca_file: null # Used for self signed certificates
 
 storage:
   tmp: "STORAGE_TMP_PATH"
@@ -129,6 +116,7 @@ storage:
   cache: "STORAGE_CACHE_PATH"
   plugins: "STORAGE_PLUGINS_PATH"
   well_known: "STORAGE_WELLKNOWN_PATH"
+  uploads: "STORAGE_UPLOADS_PATH"
   client_overrides: "STORAGE_CLIENT_OVERRIDES_PATH"
 
 static_files:
@@ -165,21 +153,22 @@ object_storage:
     prefix: "OBJECT_STORAGE_STREAMING_PLAYLISTS_PREFIX"
     base_url: "OBJECT_STORAGE_STREAMING_PLAYLISTS_BASE_URL"
     store_live_streams: OBJECT_STORAGE_STREAMING_PLAYLISTS_STORE_LIVE_STREAMS
-
   web_videos:
     bucket_name: "OBJECT_STORAGE_WEB_VIDEOS_BUCKET_NAME"
     prefix: "OBJECT_STORAGE_WEB_VIDEOS_PREFIX"
     base_url: "OBJECT_STORAGE_WEB_VIDEOS_BASE_URL"
-
   user_exports:
     bucket_name: "OBJECT_STORAGE_USER_EXPORTS_BUCKET_NAME"
     prefix: "OBJECT_STORAGE_USER_EXPORTS_PREFIX"
     base_url: "OBJECT_STORAGE_USER_EXPORTS_BASE_URL"
-
   original_video_files:
     bucket_name: "OBJECT_STORAGE_ORIGINAL_VIDEO_BUCKET_NAME"
     prefix: "OBJECT_STORAGE_ORIGINAL_VIDEO_PREFIX"
     base_url: "OBJECT_STORAGE_ORIGINAL_VIDEO_BASE_URL"
+  captions:
+    bucket_name: "OBJECT_STORAGE_CAPTIONS_BUCKET_NAME"
+    prefix: "OBJECT_STORAGE_CAPTIONS_PREFIX"
+    base_url: "OBJECT_STORAGE_CAPTIONS_BASE_URL"
 
 log:
   level: "LOG_LEVEL"
@@ -231,6 +220,50 @@ open_telemetry:
     jaeger_exporter:
       endpoint: "OPENTELEMETRY_TRACING_JAEGER_EXPORTER_ENDPOINT"
 
+#trending:
+#  videos:
+#    interval_days: 7 # Compute trending videos for the last x days for 'most-viewed' algorithm
+#    algorithms:
+#      enabled:
+#        - 'hot' # Adaptation of Reddit's 'Hot' algorithm
+#        - 'most-viewed' # Number of views in the last x days
+#        - 'most-liked' # Global views since the upload of the video
+#      default: 'hot'
+## Cache remote videos on your server, to help other instances to broadcast the video
+## You can define multiple caches using different sizes/strategies
+## Once you have defined your strategies, choose which instances you want to cache in admin -> manage follows -> following
+#redundancy:
+#  videos:
+#    check_interval: '1 hour' # How often you want to check new videos to cache
+#    strategies: # Just uncomment strategies you want
+##      -
+##        size: '10GB'
+##        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
+##        min_lifetime: '48 hours'
+##        strategy: 'most-views' # Cache videos that have the most views
+##      -
+##        size: '10GB'
+##        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
+##        min_lifetime: '48 hours'
+##        strategy: 'trending' # Cache trending videos
+##      -
+##        size: '10GB'
+##        # Minimum time the video must remain in the cache. Only accept values > 10 hours (to not overload remote instances)
+##        min_lifetime: '48 hours'
+##        strategy: 'recently-added' # Cache recently added videos
+##        min_views: 10 # Having at least x views
+#
+## Other instances that duplicate your content
+#remote_redundancy:
+#  videos:
+#    # PeerTube doesn't remove existing redundancies when you change this setting
+#    # You can remove them in the web interface: https://docs.joinpeertube.org/admin/following-instances#instances-redundancy
+#    # Available values:
+#    #  * nobody: Do not accept remote redundancies
+#    #  * followings: Accept redundancies from instance followings
+#    #  * anybody: Accept remote redundancies from anybody
+#    accept_from: 'anybody'
+#
 csp:
   enabled:
     __name: "ENABLE_CSP"
@@ -260,6 +293,56 @@ tracker:
   reject_too_many_announces:
     __name: "TRACKER_REJECT_TOO_MANY_ANNOUNCES"
     __format: "json"
+
+#history:
+#  videos:
+#    # If you want to limit users videos history
+#    # -1 means there is no limitations
+#    # Other values could be '6 months' or '30 days' etc (PeerTube will periodically delete old entries from database)
+#    max_age: -1
+
+#views:
+#  videos:
+#    # PeerTube creates a database entry every hour for each video to track views over a period of time
+#    # This is used in particular by the Trending page
+#    # PeerTube could remove old remote video views if you want to reduce your database size (video view counter will not be altered)
+#    # -1 means no cleanup
+#    # Other values could be '6 months' or '30 days' etc (PeerTube will periodically delete old entries from database)
+#    remote:
+#      max_age: '30 days'
+#    # PeerTube buffers local video views before updating and federating the video
+#    local_buffer_update_interval: '30 minutes'
+#    # How long does it take to count again a view from the same user
+#    view_expiration: '1 hour'
+#    # Minimum amount of time the viewer has to watch the video before PeerTube adds a view
+#    count_view_after: '10 seconds'
+#    # Player can send a session id string to track the user
+#    # Since this can be spoofed by users to create fake views, you have the option to disable this feature
+#    # If disabled, PeerTube will use the IP address to track the same user (default behavior before PeerTube 6.1)
+#    trust_viewer_session_id: true
+#    # How often the web browser sends "is watching" information to the server
+#    # Increase the value or set null to disable it if you plan to have many viewers
+#    watching_interval:
+#      # Non logged-in viewers
+#      anonymous: '5 seconds'
+#      # Logged-in users of your instance
+#      # Unlike anonymous viewers, this endpoint is also used to store the "last watched video timecode" for your users
+#      # Increasing this value reduces the accuracy of the video resume
+#      users: '5 seconds'
+## Used to get country location of views of local videos
+#geo_ip:
+#  enabled: true
+#  country:
+#    database_url: 'https://dbip.mirror.framasoft.org/files/dbip-country-lite-latest.mmdb'
+#  city:
+#    database_url: 'https://dbip.mirror.framasoft.org/files/dbip-city-lite-latest.mmdb'
+#plugins:
+#  # The website PeerTube will ask for available PeerTube plugins and themes
+#  # This is an unmoderated plugin index, so only install plugins/themes you trust
+#  index:
+#    enabled: true
+#    check_latest_versions_interval: '4 hours' # How often you want to check new plugins/themes versions
+#    url: 'https://packages.joinpeertube.org'
 
 federation:
   enabled:
@@ -296,6 +379,38 @@ webadmin:
       allowed:
         __name: "STATS_ENABLE_REGISTRATION_REQUESTS"
         __format: "json"
+
+## XML, Atom or JSON feeds
+#feeds:
+#  videos:
+#    # Default number of videos displayed in feeds
+#    count: 20
+#  comments:
+#    # Default number of comments displayed in feeds
+#    count: 20
+#remote_runners:
+#  # Consider jobs that are processed by a remote runner as stalled after this period of time without any update
+#  stalled_jobs:
+#    live: '30 seconds'
+#    vod: '2 minutes'
+#    studio: '2 minutes'
+#    transcription: '2 minutes'
+#thumbnails:
+#  # When automatically generating a thumbnail from the video
+#  generation_from_video:
+#    # How many frames to analyze at the middle of the video to select the most appropriate one
+#    # Increasing this value will increase CPU and memory usage when generating the thumbnail, especially for high video resolution
+#    # Minimum value is 2
+#    frames_to_analyze: 50
+#  # Only two sizes are currently supported for now (not less, not more)
+#  # 1 size for the thumbnail (displayed in video miniatures)
+#  # 1 size for the preview (displayed in the video player)
+#  sizes:
+#    - width: 280
+#      height: 157
+#    - width: 850
+#      height: 480
+
 stats:
   registration_requests:
     enabled:
@@ -317,8 +432,22 @@ stats:
       __name: "STATS_ENABLE_TOTAL_ADMINS"
       __format: "json"
 
-user:
-  video_quota: "PEERTUBE_USER_VIDEO_QUOTA"
+#webrtc:
+#  # 1 or 2 STUN servers are sufficient
+#  stun_servers:
+#    - 'stun:stunserver2024.stunprotocol.org'
+#    - 'stun:stun.framasoft.org'
+#nsfw_flags_settings:
+#  # Allow logged-in/anonymous users to have a more granular control over their NSFW policy
+#  # using NSFW flags (violent content, etc.) set by video authors
+#  enabled: true
+#
+#download_generate_video:
+#  # Max parallel downloads on your instance
+#  # Each download spawns an ffmpeg process
+#  # The ffmpeg process ends when users have downloaded the entire file or cancelled the download
+#  max_parallel_downloads: 100
+#
 
 admin:
   email: "PEERTUBE_ADMIN_EMAIL"
@@ -330,17 +459,8 @@ signup:
   enabled: "PEERTUBE_SIGNUP_ENABLED"
   limit: "PEERTUBE_SIGNUP_LIMIT"
 
-search:
-  remote_uri:
-    users: "PEERTUBE_SEARCH_REMOTEURI_USERS"
-    anonymous: "PEERTUBE_SEARCH_REMOTEURI_ANONYMOUS"
-
-import:
-  videos:
-    http:
-      enabled: "PEERTUBE_IMPORT_VIDEOS_HTTP"
-    torrent:
-      enabled: "PEERTUBE_IMPORT_VIDEOS_TORRENT"
+user:
+  video_quota: "PEERTUBE_USER_VIDEO_QUOTA"
 
 transcoding:
   enabled: "PEERTUBE_TRANSCODING_ENABLED"
@@ -363,3 +483,51 @@ instance:
   name: "PEERTUBE_INSTANCE_NAME"
   description: "PEERTUBE_INSTANCE_DESCRIPTION"
   terms: "PEERTUBE_INSTANCE_TERMS"
+
+search:
+  remote_uri:
+    users: "PEERTUBE_SEARCH_REMOTEURI_USERS"
+    anonymous: "PEERTUBE_SEARCH_REMOTEURI_ANONYMOUS"
+
+defaults:
+  publish:
+    download_enabled:
+        __name: "DEFAULT_PUBLISH_ENABLE_DOWNLOAD"
+        __format: "json"
+    comments_policy: "DEFAULT_PUBLISH_COMMENTS_POLICY"
+    privacy: "DEFAULT_PUBLIC_PRIVACY"
+    license: "DEFAULT_PUBLIC_LICENSE"
+
+  p2p:
+    webapp:
+      enabled:
+        __name: "DEFAULT_P2P_ENABLE_WEBAPP"
+        __format: "json"
+    embed:
+      enabled:
+        __name: "DEFAULT_P2P_ENABLE_EMBED"
+        __format: "json"
+
+email:
+  body:
+    signature: "EMAIL_BODY_SIGNATURE"
+  subject:
+    prefix: "EMAIL_SUBJECT_PREFIX"
+
+
+
+
+
+
+
+
+
+
+
+
+import:
+  videos:
+    http:
+      enabled: "PEERTUBE_IMPORT_VIDEOS_HTTP"
+    torrent:
+      enabled: "PEERTUBE_IMPORT_VIDEOS_TORRENT"

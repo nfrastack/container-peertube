@@ -19,9 +19,9 @@ LABEL \
         org.opencontainers.image.licenses="MIT"
 
 ARG \
-    PEERTUBE_VERSION=v7.3.0 \
+    PEERTUBE_VERSION="v7.3.0" \
     PEERTUBE_REPO_URL="https://github.com/Chocobozzz/PeerTube" \
-    PEERTUBE_CONTAINER=PRODUCTION \
+    PEERTUBE_CONTAINER="PRODUCTION" \
     YQ_VERSION="v4.47.2" \
     YQ_REPO_URL="https://github.com/mikefarah/yq"
 
@@ -38,8 +38,8 @@ ENV \
     NGINX_SITE_ENABLED=peertube \
     NGINX_USER=peertube \
     NGINX_GROUP=peertube \
-    IMAGE_NAME="tiredofit/peertube" \
-    IMAGE_REPO_URL="https://github.com/tiredofit/docker-peertube/"
+    IMAGE_NAME="nfrastack/peertube" \
+    IMAGE_REPO_URL="https://github.com/nfrastack/container-peertube/"
 
 RUN echo "" && \
     PEERTUBE_BUILD_DEPS_ALPINE=" \

@@ -48,5 +48,5 @@ case "${PEERTUBE_CONTAINER,,}" in
     ;;
 esac
 
-print_start "Starting Peertube ${PEERTUBE_VERSION}"
+print_start "Starting Peertube $(grep -o "ADD: PeerTube .* |" /container/build/${IMAGE_NAME/\//_}/build.log | awk '{print $3}')"
 exec s6-setuidgid peertube ${peertube_exec}
