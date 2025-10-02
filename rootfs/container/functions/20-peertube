@@ -5,8 +5,8 @@
 peertube_bootstrap_filesystem() {
     create_folder \
                     "${CONFIG_PATH},\
-                    ${DATA_PATH},
-                    ${LOG_PATH}" \
+                    ${DATA_PATH},\
+                    ${LOG_PATH}"\
                     peertube:peertube 755
 
     create_logrotate peertube "${LOG_PATH}"/peertube.log peertube peertube

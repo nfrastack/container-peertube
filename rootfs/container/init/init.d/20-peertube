@@ -7,7 +7,7 @@ source /container/base/functions/container/init
 set -a
 prepare_service
 set +a
-PROCESS_NAME="peertube"
+SERVICE_NAME="peertube"
 
 if check_container_restarted ; then
     call peertube_bootstrap_filesystem

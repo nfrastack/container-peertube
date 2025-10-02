@@ -2,9 +2,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-ARG BASE_IMAGE
-ARG DISTRO
-ARG DISTRO_VARIANT
+ARG \
+    BASE_IMAGE \
+    DISTRO \
+    DISTRO_VARIANT
 
 FROM ${BASE_IMAGE}:${DISTRO}_${DISTRO_VARIANT}
 
@@ -64,6 +65,7 @@ RUN echo "" && \
     PEERTUBE_RUN_DEPS_DEBIAN=" \
                                     ffmpeg \
                                     git \
+                                    lua-unbound \
                                     nodejs \
                                     postgresql-client \
                                     python3 \
